@@ -27,7 +27,7 @@ jobs:
 
       # Step 3: Install Composer dependencies for Laravel
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --no-interaction --prefer-dist --no-progress --no-suggest
 
       # Step 4: Copy .env file and generate Laravel application key
       - name: Setup .env and app key
@@ -55,19 +55,20 @@ jobs:
 
       # Step 9: Serve the Laravel application in the background
       - name: Serve Laravel application
-        run: nohup php artisan serve --host=127.0.0.1 --port=8000 > /dev/null 2>&1 &
+        run: nohup php artisan serve --host=127.0.0.1 --port=8000 --no-ansi > /dev/null 2>&1 &
 
       # Step 10: Wait for Laravel server to start
       - name: Wait for Laravel server to start
-        run: sleep 10 # Adjust if your app needs more time to start
+        run: |
+          while ! curl -s http://127.0.0.1:8000/ >/dev/null 2>&1; do
+            sleep 1
+          done
 
       # Step 11: Run Lighthouse Audit
-      # Perform a Lighthouse audit on the Laravel application served at http://127.0.0.1:8000
       - name: Run Lighthouse Audit
         run: lighthouse http://127.0.0.1:8000 --output json --output-path ./lighthouse-report.json
 
       # Step 12: Upload the Lighthouse report as an artifact
-      # Save the Lighthouse report so it can be accessed later in GitHub Actions
       - name: Upload Lighthouse Report
         uses: actions/upload-artifact@v3
         with:
