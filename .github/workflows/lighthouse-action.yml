@@ -1,0 +1,75 @@
+name: Laravel + Vue Social Media CI Pipeline with Lighthouse
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  lighthouse_audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up PHP environment for Laravel
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2" # Use your Laravel PHP version here
+
+      # Step 3: Install Composer dependencies for Laravel
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      # Step 4: Copy .env file and generate Laravel application key
+      - name: Setup .env and app key
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # Step 5: Run Laravel migrations (if needed)
+      - name: Run migrations
+        run: php artisan migrate --env=testing --force
+
+      # Step 6: Set up Node.js environment for Vue
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # Match your Vue project's Node.js version
+
+      # Step 7: Install NPM dependencies for Vue and Lighthouse
+      - name: Install NPM dependencies
+        run: npm install
+
+      # Step 8: Build Vue assets (if using Laravel Mix or any bundler)
+      - name: Build Vue assets
+        run: npm run build
+
+      # Step 9: Serve the Laravel application in the background
+      - name: Serve Laravel application
+        run: nohup php artisan serve --host=127.0.0.1 --port=8000 > /dev/null 2>&1 &
+
+      # Step 10: Wait for Laravel server to start
+      - name: Wait for Laravel server to start
+        run: sleep 10 # Adjust if your app needs more time to start
+
+      # Step 11: Run Lighthouse Audit
+      # Perform a Lighthouse audit on the Laravel application served at http://127.0.0.1:8000
+      - name: Run Lighthouse Audit
+        run: lighthouse http://127.0.0.1:8000 --output json --output-path ./lighthouse-report.json
+
+      # Step 12: Upload the Lighthouse report as an artifact
+      # Save the Lighthouse report so it can be accessed later in GitHub Actions
+      - name: Upload Lighthouse Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: lighthouse-report
+          path: lighthouse-report.json
