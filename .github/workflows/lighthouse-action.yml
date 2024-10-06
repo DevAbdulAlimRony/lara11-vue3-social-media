@@ -45,30 +45,34 @@ jobs:
         with:
           node-version: "18" # Match your Vue project's Node.js version
 
-      # Step 7: Install NPM dependencies for Vue and Lighthouse
+      # Step 7: Install NPM dependencies for Vue, Lighthouse, and other tools
       - name: Install NPM dependencies
         run: npm install
 
-      # Step 8: Build Vue assets (if using Laravel Mix or any bundler)
+      # Step 8: Install Lighthouse globally
+      - name: Install Lighthouse globally
+        run: npm install -g lighthouse
+
+      # Step 9: Build Vue assets (if using Laravel Mix or any bundler)
       - name: Build Vue assets
         run: npm run build
 
-      # Step 9: Serve the Laravel application in the background
+      # Step 10: Serve the Laravel application in the background
       - name: Serve Laravel application
         run: nohup php artisan serve --host=127.0.0.1 --port=8000 --no-ansi > /dev/null 2>&1 &
 
-      # Step 10: Wait for Laravel server to start
+      # Step 11: Wait for Laravel server to start
       - name: Wait for Laravel server to start
         run: |
           while ! curl -s http://127.0.0.1:8000/ >/dev/null 2>&1; do
             sleep 1
           done
 
-      # Step 11: Run Lighthouse Audit
+      # Step 12: Run Lighthouse Audit
       - name: Run Lighthouse Audit
         run: lighthouse http://127.0.0.1:8000 --output json --output-path ./lighthouse-report.json
 
-      # Step 12: Upload the Lighthouse report as an artifact
+      # Step 13: Upload the Lighthouse report as an artifact
       - name: Upload Lighthouse Report
         uses: actions/upload-artifact@v3
         with:
