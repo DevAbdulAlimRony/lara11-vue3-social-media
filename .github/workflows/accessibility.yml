@@ -1,0 +1,28 @@
+name: Laravel + Vue Social Media CI Pipeline with Accessibility Testing
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  accessibility_audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ... other steps ...
+
+      # Step X: Install Axe-Core
+      - name: Install Axe-Core
+        run: npm install axe-core
+
+      # Step X+1: Run accessibility tests
+      - name: Run accessibility tests
+        run: |
+          npm run build
+          node --require axe-core test.js
