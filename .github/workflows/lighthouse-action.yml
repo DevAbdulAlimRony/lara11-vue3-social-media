@@ -1,4 +1,4 @@
-name: Laravel + Vue Social Media CI Pipeline with Lighthouse
+name: Laravel + Vue CI Pipeline with Lighthouse
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2" # Use your Laravel PHP version here
+          php-version: "8.2" # Adjust as needed
 
       # Step 3: Install Composer dependencies for Laravel
       - name: Install Composer dependencies
@@ -43,15 +43,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "14" # Match your Vue project's Node.js version
+          node-version: "16.x" # Better to use Node.js 16.x for Lighthouse CI
 
       # Step 7: Install NPM dependencies for Vue, Lighthouse, and other tools
       - name: Install NPM dependencies
         run: npm install
 
-      # Step 8: Install Lighthouse globally
-      - name: Install Lighthouse globally
-        run: npm install -g lighthouse
+      # Step 8: Install Lighthouse CI globally
+      - name: Install Lighthouse CI globally
+        run: npm install -g @lhci/cli@0.14.x
 
       # Step 9: Build Vue assets (if using Laravel Mix or any bundler)
       - name: Build Vue assets
@@ -68,14 +68,16 @@ jobs:
             sleep 1
           done
 
-      # Step 12: Run Lighthouse Audit
-      - name: Run Lighthouse Audit
-        continue-on-error: true
-        run: lighthouse --config.port=8000 --config.token={{ secrets.LIGHTHOUSE_CI_API_TOKEN }} --output json --output-path ./lighthouse-report.json
+      # Step 12: Run Lighthouse CI Audit
+      # Run LHCI using the 'autorun' command for best practices
+      - name: Run Lighthouse CI Audit
+        run: lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
       # Step 13: Upload the Lighthouse report as an artifact
-      - name: Upload Lighthouse Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: lighthouse-report
-          path: lighthouse-report.json
+    #   - name: Upload Lighthouse Report
+    #     uses: actions/upload-artifact@v3
+    #     with:
+    #       name: lighthouse-report
+    #       path: .lighthouseci/lhr-*.json
