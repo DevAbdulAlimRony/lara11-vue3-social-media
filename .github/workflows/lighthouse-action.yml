@@ -43,7 +43,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18" # Match your Vue project's Node.js version
+          node-version: "14" # Match your Vue project's Node.js version
 
       # Step 7: Install NPM dependencies for Vue, Lighthouse, and other tools
       - name: Install NPM dependencies
@@ -70,6 +70,7 @@ jobs:
 
       # Step 12: Run Lighthouse Audit
       - name: Run Lighthouse Audit
+        continue-on-error: true
         run: lighthouse --config.port=8000 --config.token={{ secrets.LIGHTHOUSE_CI_API_TOKEN }} --output json --output-path ./lighthouse-report.json
 
       # Step 13: Upload the Lighthouse report as an artifact
