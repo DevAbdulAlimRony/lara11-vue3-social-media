@@ -70,7 +70,7 @@ jobs:
 
       # Step 12: Run Lighthouse Audit
       - name: Run Lighthouse Audit
-        run: lighthouse http://127.0.0.1:8000 --output json --output-path ./lighthouse-report.json
+        run: lighthouse --config.port=8000 --config.token={{ secrets.LIGHTHOUSE_CI_API_TOKEN }} --output json --output-path ./lighthouse-report.json
 
       # Step 13: Upload the Lighthouse report as an artifact
       - name: Upload Lighthouse Report
